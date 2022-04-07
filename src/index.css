@@ -31,3 +31,7 @@ body, html, .App, #root, .login-wrapper {
   margin-bottom: 0;
   line-height: 1;
 }
+
+.navbar {
+  margin-bottom: 70px;
+}
