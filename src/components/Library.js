@@ -19,7 +19,7 @@ function Library(props) {
     const getSteamGames = async () => {
         setLoading(true);
         console.log(steamId);
-        await axios.post(`http://localhost:8080/api/v1/game/steam`, steamId)
+        await axios.post(global.config.api.url + `game/steam`, steamId)
             .then(res => console.log(res));
 
         setLoading(false);
@@ -27,17 +27,18 @@ function Library(props) {
 
     const getAllGames = async () => {
         setLoading(true);
-        await axios.get(`http://localhost:8080/api/v1/game/`)
+        await axios.get(global.config.api.url + `game/`)
             .then(res => setGamesList(res.data));
         setLoading(false);
     }
 
+    //TODO: this should probably be in the modal component
     const updateGame = async (editedGame) => {
         if (Object.entries(editedGame).length > 0) {
             setLoading(true);
             editedGame.id = activeGame.id;
             console.log(editedGame);
-            await axios.put(`http://localhost:8080/api/v1/game/`, editedGame)
+            await axios.put(global.config.api.url + `game/`, editedGame)
                 .then(res => console.log(res));
             setActiveGame({});
             await getAllGames();
@@ -108,7 +109,6 @@ function Library(props) {
                             <td>{game.gameStatus}</td>
                             <td><Button variant="primary" onClick={() => {
                                 setActiveGame(game);
-
                                 setShow(true);
                             }}>
                                 Edit
@@ -117,10 +117,7 @@ function Library(props) {
                     </tbody>
                 )}
             </Table>
-
             <EditModal show={show} onHide={handleClose} updateGame={updateGame} activeGame={activeGame} />
-
-
         </>
     );
 
