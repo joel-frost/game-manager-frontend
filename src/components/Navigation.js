@@ -1,4 +1,5 @@
 import { Navbar, Nav, Container } from "react-bootstrap"
+import logo from "./../images/logo.png"
 
 function Navigation() {
 
@@ -6,9 +7,11 @@ function Navigation() {
         <>
             <Navbar bg="dark" variant="dark" fixed="top">
                 <Container>
-                    <Navbar.Brand href="#home">Game Manager</Navbar.Brand>
+                    <Navbar.Brand href="/library">
+                        <img src={logo} width="50" height="30" className="d-inline-block align-top" alt="Logo" />
+                        Game Manager</Navbar.Brand>
                     <Nav className="me-auto">
-                        <Nav.Link href="/library">Home</Nav.Link>
+                        <Nav.Link href="/library">Library</Nav.Link>
                         <Nav.Link href="/">Login</Nav.Link>
                     </Nav>
                 </Container>

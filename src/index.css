@@ -2,7 +2,11 @@ body {
   display: flex;
 }
 
-body, html, .App, #root, .login-wrapper {
+body,
+html,
+.App,
+#root,
+.login-wrapper {
   width: 100%;
   height: 100%;
 }
@@ -19,7 +23,6 @@ body, html, .App, #root, .login-wrapper {
   box-shadow: 0px 14px 80px rgba(34, 35, 58, 0.2);
   padding: 40px 55px 45px 55px;
   border-radius: 15px;
-
 }
 .login-wrapper .form-control:focus {
   border-color: #167bff;
@@ -34,4 +37,8 @@ body, html, .App, #root, .login-wrapper {
 
 .navbar {
   margin-bottom: 70px;
+}
+
+img {
+  margin-right: 10px;
 }
