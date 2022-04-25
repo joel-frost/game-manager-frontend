@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Form, Spinner, Container, Row, Col, Table, Button } from 'react-bootstrap';
+import { Form, Spinner, Container, Row, Col, Table, Button, Modal } from 'react-bootstrap';
 import Navigation from "./Navigation";
 import "./library.css";
 
@@ -9,6 +9,13 @@ function Library() {
     const [loading, setLoading] = useState(false);
     const [gamesList, setGamesList] = useState({});
     const [steamId, setSteamId] = useState("");
+    const [show, setShow] = useState(false);
+    const [activeGame, setActiveGame] = useState({});
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => {
+        setShow(true);
+    }
 
     const getSteamGames = async () => {
         setLoading(true);
@@ -36,6 +43,8 @@ function Library() {
         await getSteamGames();
         await getAllGames();
     }
+
+
 
     if (loading) return (
         <>
@@ -73,6 +82,7 @@ function Library() {
                         <th>Release Date</th>
                         <th>Rating</th>
                         <th>Playing Status</th>
+                        <th>Edit</th>
                     </tr>
                 </thead>
                 {gamesList.map((game) =>
@@ -83,10 +93,54 @@ function Library() {
                             <td>{game.releaseDate}</td>
                             <td>{game.aggregatedRating > -1 ? + game.aggregatedRating + '%' : 'Unavailable'}</td>
                             <td>{game.gameStatus}</td>
+                            <td><Button variant="primary" onClick={() => {
+                                setActiveGame(game);
+                                console.log(activeGame);
+                                setShow(true);
+                            }}>
+                                Edit
+                            </Button></td>
                         </tr>
                     </tbody>
                 )}
             </Table>
+
+            <Modal show={show} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Edit Game</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="editGameForm">
+                            <Form.Label>Name</Form.Label>
+                            <Form.Control placeholder={activeGame.name} />
+                            <Form.Label>Description</Form.Label>
+                            <Form.Control placeholder={activeGame.description} />
+                            <Form.Label>Rating</Form.Label>
+                            <Form.Control placeholder={activeGame.aggregatedRating} disabled />
+                            <Form.Label>Release Date</Form.Label>
+                            <Form.Control placeholder={activeGame.releaseDate} disabled />
+                            <Form.Label>Status</Form.Label>
+                            <Form.Select>
+                                <option>Playing</option>
+                                <option>On Hold</option>
+                                <option>Completed</option>
+                                <option>Abandoned</option>
+                                <option>Not Set</option>
+                            </Form.Select>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Close
+                    </Button>
+                    {/* TODO make this button add game to backend */}
+                    <Button variant="primary" onClick={handleClose}>
+                        Save Changes
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     );
 
