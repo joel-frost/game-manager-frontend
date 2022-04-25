@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Form, Spinner, Container, Row, Col, Table, Button, Modal } from 'react-bootstrap';
+import { Form, Spinner, Container, Row, Col, Table, Button } from 'react-bootstrap';
 import Navigation from "./Navigation";
+import EditModal from "./EditModal";
 import "./library.css";
 
-function Library() {
+function Library(props) {
     //76561198000548372
     const [loading, setLoading] = useState(false);
     const [gamesList, setGamesList] = useState({});
@@ -12,10 +13,8 @@ function Library() {
     const [show, setShow] = useState(false);
     const [activeGame, setActiveGame] = useState({});
 
+
     const handleClose = () => setShow(false);
-    const handleShow = () => {
-        setShow(true);
-    }
 
     const getSteamGames = async () => {
         setLoading(true);
@@ -31,6 +30,20 @@ function Library() {
         await axios.get(`http://localhost:8080/api/v1/game/`)
             .then(res => setGamesList(res.data));
         setLoading(false);
+    }
+
+    const updateGame = async (editedGame) => {
+        if (Object.entries(editedGame).length > 0) {
+            setLoading(true);
+            editedGame.id = activeGame.id;
+            console.log(editedGame);
+            await axios.put(`http://localhost:8080/api/v1/game/`, editedGame)
+                .then(res => console.log(res));
+            setActiveGame({});
+            await getAllGames();
+            setLoading(false);
+        }
+        setShow(false);
     }
 
     useEffect(() => {
@@ -95,7 +108,7 @@ function Library() {
                             <td>{game.gameStatus}</td>
                             <td><Button variant="primary" onClick={() => {
                                 setActiveGame(game);
-                                console.log(activeGame);
+
                                 setShow(true);
                             }}>
                                 Edit
@@ -105,42 +118,9 @@ function Library() {
                 )}
             </Table>
 
-            <Modal show={show} onHide={handleClose}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Edit Game</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="editGameForm">
-                            <Form.Label>Name</Form.Label>
-                            <Form.Control placeholder={activeGame.name} />
-                            <Form.Label>Description</Form.Label>
-                            <Form.Control placeholder={activeGame.description} />
-                            <Form.Label>Rating</Form.Label>
-                            <Form.Control placeholder={activeGame.aggregatedRating} disabled />
-                            <Form.Label>Release Date</Form.Label>
-                            <Form.Control placeholder={activeGame.releaseDate} disabled />
-                            <Form.Label>Status</Form.Label>
-                            <Form.Select>
-                                <option>Playing</option>
-                                <option>On Hold</option>
-                                <option>Completed</option>
-                                <option>Abandoned</option>
-                                <option>Not Set</option>
-                            </Form.Select>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>
-                        Close
-                    </Button>
-                    {/* TODO make this button add game to backend */}
-                    <Button variant="primary" onClick={handleClose}>
-                        Save Changes
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            <EditModal show={show} onHide={handleClose} updateGame={updateGame} activeGame={activeGame} />
+
+
         </>
     );
 
