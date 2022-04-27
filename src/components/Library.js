@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Form, Spinner, Container, Row, Col, Table, Button } from 'react-bootstrap';
+import { Form, Table, Button } from 'react-bootstrap';
 import Navigation from "./Navigation";
 import EditModal from "./EditModal";
+import AddModal from "./AddModal";
+import LoadingScreen from "./LoadingScreen";
 import "./library.css";
 
 function Library(props) {
@@ -10,11 +12,13 @@ function Library(props) {
     const [loading, setLoading] = useState(false);
     const [gamesList, setGamesList] = useState({});
     const [steamId, setSteamId] = useState("");
-    const [show, setShow] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showAddModal, setShowAddModal] = useState(false);
     const [activeGame, setActiveGame] = useState({});
 
 
-    const handleClose = () => setShow(false);
+    const handleEditModalClose = () => setShowEditModal(false);
+    const handleAddModalClose = () => setShowAddModal(false);
 
     const getSteamGames = async () => {
         setLoading(true);
@@ -44,7 +48,7 @@ function Library(props) {
             await getAllGames();
             setLoading(false);
         }
-        setShow(false);
+        setShowEditModal(false);
     }
 
     useEffect(() => {
@@ -61,18 +65,7 @@ function Library(props) {
 
 
     if (loading) return (
-        <>
-            <Navigation />
-            <Container className="vertical-center">
-                <Row className="text-center"><Row>
-                    <Col>
-                        <Spinner animation="border" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                        </Spinner>
-                    </Col>
-                </Row></Row>
-            </Container>
-        </>
+        <LoadingScreen />
 
     );
     if (Object.keys(gamesList).length === 0) return (
@@ -88,6 +81,7 @@ function Library(props) {
     return (
         <>
             <Navigation />
+            <Button variant="primary" onClick={() => setShowAddModal(true)}>Add New Game</Button>
             <Table striped bordered hover>
                 <thead>
                     <tr>
@@ -109,7 +103,7 @@ function Library(props) {
                             <td>{game.gameStatus}</td>
                             <td><Button variant="primary" onClick={() => {
                                 setActiveGame(game);
-                                setShow(true);
+                                setShowEditModal(true);
                             }}>
                                 Edit
                             </Button></td>
@@ -117,7 +111,8 @@ function Library(props) {
                     </tbody>
                 )}
             </Table>
-            <EditModal show={show} onHide={handleClose} updateGame={updateGame} activeGame={activeGame} />
+            <AddModal show={showAddModal} onHide={handleAddModalClose} />
+            <EditModal show={showEditModal} onHide={handleEditModalClose} updateGame={updateGame} activeGame={activeGame} />
         </>
     );
 
