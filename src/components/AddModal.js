@@ -30,7 +30,24 @@ function AddModal(props) {
     }
 
     if (manualInput) {
-        return
+        return (<Modal show={props.show} onHide={props.onHide}>
+            <Modal.Header closeButton>
+                <Modal.Title>Add Game</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form>
+                    <Form.Group className="mb-3" controlId="addGameForm">
+                        <Form.Label>Form Goes here</Form.Label>
+                        <Form.Control
+                            onChange={(e) => { console.log(e.target.value) }} />
+                    </Form.Group>
+                </Form>
+                <Button variant="secondary" onClick={props.onHide}>
+                    Close
+                </Button>
+
+            </Modal.Body>
+        </Modal>)
     }
     if (searchResponse.length > 0) {
         return (<Modal show={props.show} onHide={props.onHide}>
@@ -53,6 +70,9 @@ function AddModal(props) {
                     searchForGame();
                 }}>
                     Search
+                </Button>
+                <Button variant="secondary" onClick={() => setManualInput(true)}>
+                    Close
                 </Button>
                 <Table striped bordered hover>
                     <thead>
@@ -102,6 +122,9 @@ function AddModal(props) {
                 searchForGame();
             }}>
                 Search
+            </Button>
+            <Button variant="secondary" onClick={setManualInput(true)}>
+                Close
             </Button>
 
         </Modal.Body>
