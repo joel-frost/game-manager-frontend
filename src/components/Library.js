@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { Form, Table, Button } from 'react-bootstrap';
 import Navigation from "./Navigation";
 import EditModal from "./EditModal";
@@ -9,6 +10,7 @@ import "./library.css";
 
 function Library(props) {
     //76561198000548372
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [gamesList, setGamesList] = useState({});
     const [steamId, setSteamId] = useState("");
@@ -52,9 +54,18 @@ function Library(props) {
     }
 
     useEffect(() => {
-        setLoading(true);
-        getAllGames();
+        if (localStorage.getItem('logged_in') !== "true") {
+            navigate("/login");
+        }
+    });
+
+    useEffect(() => {
+        if (localStorage.getItem('logged_in') === "true") {
+            setLoading(true);
+            getAllGames();
+        }
     }, []);
+
 
     const handleImportButton = async (e) => {
         e.preventDefault();
