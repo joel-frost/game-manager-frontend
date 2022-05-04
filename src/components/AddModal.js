@@ -6,7 +6,7 @@ import axios from "axios";
 function AddModal(props) {
 
     const [loading, setLoading] = useState(false);
-    const [manualInput, setManualInput] = useState(false);
+    // const [manualInput, setManualInput] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResponse, setSearchResponse] = useState([]);
     const [selectedGame, setSelectedGame] = useState({});
@@ -29,26 +29,26 @@ function AddModal(props) {
         setLoading(false);
     }
 
-    if (manualInput) {
-        return (<Modal show={props.show} onHide={props.onHide}>
-            <Modal.Header closeButton>
-                <Modal.Title>Add Game</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Form>
-                    <Form.Group className="mb-3" controlId="addGameForm">
-                        <Form.Label>Form Goes here</Form.Label>
-                        <Form.Control
-                            onChange={(e) => { console.log(e.target.value) }} />
-                    </Form.Group>
-                </Form>
-                <Button variant="secondary" onClick={props.onHide}>
-                    Close
-                </Button>
+    // if (manualInput) {
+    //     return (<Modal show={props.show} onHide={props.onHide}>
+    //         <Modal.Header closeButton>
+    //             <Modal.Title>Add Game</Modal.Title>
+    //         </Modal.Header>
+    //         <Modal.Body>
+    //             <Form>
+    //                 <Form.Group className="mb-3" controlId="addGameForm">
+    //                     <Form.Label>Form Goes here</Form.Label>
+    //                     <Form.Control
+    //                         onChange={(e) => { console.log(e.target.value) }} />
+    //                 </Form.Group>
+    //             </Form>
+    //             <Button variant="secondary" onClick={props.onHide}>
+    //                 Close
+    //             </Button>
 
-            </Modal.Body>
-        </Modal>)
-    }
+    //         </Modal.Body>
+    //     </Modal>)
+    // }
     if (searchResponse.length > 0) {
         return (<Modal show={props.show} onHide={props.onHide}>
             <Modal.Header closeButton>
@@ -71,7 +71,7 @@ function AddModal(props) {
                 }}>
                     Search
                 </Button>
-                <Button variant="secondary" onClick={() => setManualInput(true)}>
+                <Button variant="secondary">
                     Close
                 </Button>
                 <Table striped bordered hover>
@@ -123,7 +123,7 @@ function AddModal(props) {
             }}>
                 Search
             </Button>
-            <Button variant="secondary" onClick={setManualInput(true)}>
+            <Button variant="secondary">
                 Close
             </Button>
 
