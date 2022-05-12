@@ -7,6 +7,7 @@ import EditModal from "./EditModal";
 import AddModal from "./AddModal";
 import LoadingScreen from "./LoadingScreen";
 import "./library.css";
+import { FaPlay, FaEdit } from "react-icons/fa";
 
 //TODO: Add a checkbox to include or exclude unrated games.
 
@@ -39,9 +40,11 @@ function Library(props) {
     const getAllGames = async () => {
         setLoading(true);
         await axios.get(global.config.api.url + `game/`)
-            .then(res => setGamesList(res.data));
+            .then(res => {
+                console.log(res.data);
+                setGamesList(res.data);
+            });
         setLoading(false);
-        console.log(gamesList);
     }
 
     //TODO: this should probably be in the modal component
@@ -107,7 +110,8 @@ function Library(props) {
         <LoadingScreen />
 
     );
-    return (
+
+    if (gamesList.length > 0) return (
         <>
             <Navigation />
             <Form.Control type="text" placeholder="Enter your Steam ID" onChange={(e) => setSteamId(e.target.value)} />
@@ -132,7 +136,7 @@ function Library(props) {
                         <th>Release Date</th>
                         <th>Rating</th>
                         <th>Playing Status</th>
-                        <th>Edit</th>
+                        <th></th>
                     </tr>
                 </thead>
                 {filteredGamesList.map((game) =>
@@ -147,14 +151,34 @@ function Library(props) {
                                 setActiveGame(game);
                                 setShowEditModal(true);
                             }}>
-                                Edit
-                            </Button></td>
+                                <FaEdit />
+                            </Button>
+                                {game.steamAppId > 0 &&
+                                    <>
+                                        <p></p>
+                                        <Button href={`steam://run/${game.steamAppId}/`} variant="primary"><FaPlay /></Button>
+                                    </>
+                                }
+                            </td>
                         </tr>
                     </tbody>
                 )}
             </Table>
             <AddModal show={showAddModal} onHide={handleAddModalClose} />
             <EditModal show={showEditModal} onHide={handleEditModalClose} updateGame={updateGame} activeGame={activeGame} />
+        </>
+    );
+
+    return (
+        <>
+            <Navigation />
+            <Form.Control type="text" placeholder="Enter your Steam ID" onChange={(e) => setSteamId(e.target.value)} />
+            <p></p>
+            <Button variant="primary" onClick={handleImportButton}>
+                Import Steam Library
+            </Button>
+            <p></p>
+            <Button variant="primary" onClick={() => setShowAddModal(true)}>Add New Game</Button>
         </>
     );
 
