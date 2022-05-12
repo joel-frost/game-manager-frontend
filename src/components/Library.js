@@ -8,6 +8,8 @@ import AddModal from "./AddModal";
 import LoadingScreen from "./LoadingScreen";
 import "./library.css";
 
+//TODO: Add a checkbox to include or exclude unrated games.
+
 function Library(props) {
     //76561198000548372
     const navigate = useNavigate();
@@ -17,6 +19,9 @@ function Library(props) {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
     const [activeGame, setActiveGame] = useState({});
+    const [nameSearch, setNameSearch] = useState("");
+    const [statusSearch, setStatusSearch] = useState("");
+    const [ratingSearch, setRatingSearch] = useState("-99");
 
 
     const handleEditModalClose = () => setShowEditModal(false);
@@ -36,6 +41,7 @@ function Library(props) {
         await axios.get(global.config.api.url + `game/`)
             .then(res => setGamesList(res.data));
         setLoading(false);
+        console.log(gamesList);
     }
 
     //TODO: this should probably be in the modal component
@@ -46,12 +52,20 @@ function Library(props) {
             console.log(editedGame);
             await axios.put(global.config.api.url + `game/`, editedGame)
                 .then(res => console.log(res));
-            setActiveGame({});
-            await getAllGames();
-            setLoading(false);
+            refreshPage();
         }
         setShowEditModal(false);
     }
+
+    const refreshPage = async () => {
+        setActiveGame({});
+        await getAllGames();
+        setNameSearch("");
+        setStatusSearch("");
+        setRatingSearch("-99");
+        setLoading(false);
+    }
+
 
     useEffect(() => {
         if (localStorage.getItem('logged_in') !== "true") {
@@ -73,26 +87,43 @@ function Library(props) {
         await getAllGames();
     }
 
+    const filteredGamesList = Object.values(gamesList).filter((game) => {
+        return ((
+            game.name.toLowerCase().includes(nameSearch.toLowerCase())
+            ||
+            game.description.toLowerCase().includes(nameSearch.toLowerCase())
+        )
+            &&
+            game.gameStatus.toLowerCase().includes(statusSearch.toLowerCase())
+            && game.aggregatedRating >= parseInt(ratingSearch)
+        )
+
+    });
+
+
 
 
     if (loading) return (
         <LoadingScreen />
 
     );
-    if (Object.keys(gamesList).length === 0) return (
-        <>
-            <Navigation />
-            <p>No games found, try importing your Steam Library!</p>
-            <Form.Control type="text" placeholder="Enter your Steam ID" onChange={(e) => setSteamId(e.target.value)} />
-            <Button variant="primary" onClick={handleImportButton}>
-                Import Steam Library
-            </Button>
-        </>
-    )
     return (
         <>
             <Navigation />
+            <Form.Control type="text" placeholder="Enter your Steam ID" onChange={(e) => setSteamId(e.target.value)} />
+            <p></p>
+            <Button variant="primary" onClick={handleImportButton}>
+                Import Steam Library
+            </Button>
+            <p></p>
             <Button variant="primary" onClick={() => setShowAddModal(true)}>Add New Game</Button>
+            <p></p>
+            <Form.Control type="text" placeholder="Search by name or description" onChange={(e) => setNameSearch(e.target.value)} />
+            <p></p>
+            <Form.Control type="text" placeholder="Search by status" onChange={(e) => setStatusSearch(e.target.value)} />
+            <p></p>
+            <Form.Control type="text" placeholder="Minimum Rating" onChange={(e) => setRatingSearch(e.target.value)} />
+            <p></p>
             <Table striped bordered hover>
                 <thead>
                     <tr>
@@ -104,7 +135,7 @@ function Library(props) {
                         <th>Edit</th>
                     </tr>
                 </thead>
-                {gamesList.map((game) =>
+                {filteredGamesList.map((game) =>
                     <tbody key={game.id}>
                         <tr>
                             <td>{game.name}</td>

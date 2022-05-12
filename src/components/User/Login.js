@@ -16,25 +16,6 @@ function Login() {
         login(localDetails);
     }
 
-    //TODO make this call the backend for login
-    // const login = details => {
-    //     const tempObj = { email: "test@test.com", password: "test" };
-    //     if (details.email === tempObj.email && details.password === tempObj.password) {
-    //         setUser({
-    //             email: details.email,
-    //             password: details.password,
-    //         });
-    //         setIsLoggedIn(true);
-    //         console.log("Logged in");
-    //         console.log(isLoggedIn);
-    //         setError(false);
-    //     }
-    //     else {
-    //         setError(true);
-    //         console.log("Incorrect details");
-    //     }
-    // }
-
     const login = details => {
         const options = {
             method: 'POST',
