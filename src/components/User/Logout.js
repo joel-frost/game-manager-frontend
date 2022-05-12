@@ -17,8 +17,8 @@ function Logout() {
     return (
         <>
             <Navigation />
-            <div className="login-wrapper">
-                <div className="login-inner">
+            <div className="form-wrapper">
+                <div className="form-inner">
                     <Form>
                         <Button variant="primary" type="submit"
                             onClick={handleLogout} >

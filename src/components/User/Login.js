@@ -42,15 +42,15 @@ function Login() {
     return (
         <>
             <Navigation />
-            <div className="login-wrapper">
-                <div className="login-inner">
+            <div className="form-wrapper">
+                <div className="form-inner">
                     <Form onSubmit={submitHandler}>
-                        <Form.Group className="mb-3" controlId="loginEmail">
+                        <Form.Group className="mb-3" controlId="form-input">
                             <Form.Label>Email address</Form.Label>
                             <Form.Control type="email" placeholder="Enter email"
                                 onChange={e => setLocalDetails({ ...localDetails, email: e.target.value })} value={localDetails.email} />
                         </Form.Group>
-                        <Form.Group className="mb-3" controlId="loginPassword">
+                        <Form.Group className="mb-3" controlId="form-input-password">
                             <Form.Label>Password</Form.Label>
                             <Form.Control type="password" placeholder="Password"
                                 onChange={e => setLocalDetails({ ...localDetails, password: e.target.value })} value={localDetails.password} />
