@@ -8,6 +8,7 @@ function SignUp() {
 
     const navigate = useNavigate();
     const [error, setError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const [localDetails, setLocalDetails] = useState({ firstName: "", lastName: "", email: "", password: "" });
     const [confPassword, setConfPassword] = useState("");
 
@@ -17,21 +18,30 @@ function SignUp() {
     }
 
     const signUpUser = async () => {
-        console.log(JSON.stringify(localDetails));
+        setError(false);
         if (localDetails.password !== confPassword) {
+            setErrorMessage("Passwords do not match");
             setError(true);
             return;
         }
 
-        axios.post(global.config.api.url + "appUser/create/user/", localDetails)
+        axios({
+            method: 'POST',
+            url: global.config.api.url + "appUser/create/user/",
+            data: localDetails,
+            validateStatus: () => true
+        })
             .then(res => {
-                if (res.status === 200) {
-                    console.log(res.data);
+                if (res.status === 201) {
                     navigate("/login");
                 }
+                else if (res.status === 409) {
+                    setErrorMessage("Email already exists");
+                    setError(true);
+                }
             }).catch(err => {
+                setErrorMessage("Unable to create user, please try again later");
                 setError(true);
-                console.log("Incorrect details");
             });
     }
 
@@ -81,7 +91,7 @@ function SignUp() {
                             Sign Up
                         </Button>
 
-                        {error && <p className="error">Invalid details, check that your passwords match.</p>}
+                        {error && <p className="error">{errorMessage}</p>}
 
                     </Form>
                 </div>
