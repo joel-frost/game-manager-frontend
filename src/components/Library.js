@@ -23,15 +23,27 @@ function Library(props) {
     const [nameSearch, setNameSearch] = useState("");
     const [statusSearch, setStatusSearch] = useState("");
     const [ratingSearch, setRatingSearch] = useState("-99");
+    const [user, setUser] = useState({});
 
 
     const handleEditModalClose = () => setShowEditModal(false);
-    const handleAddModalClose = () => setShowAddModal(false);
+    const handleAddModalClose = () => {
+        setShowAddModal(false);
+        getAllGames();
+    }
 
     const getSteamGames = async () => {
         setLoading(true);
-        console.log(steamId);
-        await axios.post(global.config.api.url + `game/steam`, steamId)
+        if (!user.steamId) {
+            setLoading(false);
+            return;
+        }
+        const steamId = user.steamId;
+        await axios.post(global.config.api.url + `game/steam/${steamId}/${localStorage.getItem('user_email')}`,
+            {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') },
+                'Content-Type': 'application/json'
+            })
             .then(res => console.log(res));
 
         setLoading(false);
@@ -39,7 +51,11 @@ function Library(props) {
 
     const getAllGames = async () => {
         setLoading(true);
-        await axios.get(global.config.api.url + `game/`)
+        await axios.get(global.config.api.url + `appUser/games/${localStorage.getItem('user_email')}`,
+            {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') },
+                'Content-Type': 'application/json'
+            })
             .then(res => {
                 console.log(res.data);
                 setGamesList(res.data);
@@ -47,7 +63,7 @@ function Library(props) {
         setLoading(false);
     }
 
-    //TODO: this should probably be in the modal component
+    //TODO: Make this update the game in the user's list.
     const updateGame = async (editedGame) => {
         if (Object.entries(editedGame).length > 0) {
             setLoading(true);
@@ -59,9 +75,28 @@ function Library(props) {
         }
         setShowEditModal(false);
     }
+    const getUserProfile = async () => {
+        setLoading(true);
+        axios.get(global.config.api.url + 'appUser/findByEmail/' + localStorage.getItem('user_email'),
+            { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') } })
+            .then(res => {
+                if (res.status === 200) {
+                    if (res.data.email !== localStorage.getItem('user_email')) {
+                        throw new Error('User not found');
+                    }
+                    setUser(res.data);
+                }
+            })
+            .catch(err => {
+                console.log(err);
+            });
+        setLoading(false);
+    }
 
     const refreshPage = async () => {
         setActiveGame({});
+        setUser({});
+        await getUserProfile();
         await getAllGames();
         setNameSearch("");
         setStatusSearch("");
@@ -79,6 +114,7 @@ function Library(props) {
     useEffect(() => {
         if (localStorage.getItem('logged_in') === "true") {
             setLoading(true);
+            getUserProfile();
             getAllGames();
         }
     }, []);
@@ -103,9 +139,6 @@ function Library(props) {
 
     });
 
-
-
-
     if (loading) return (
         <LoadingScreen />
 
@@ -114,11 +147,14 @@ function Library(props) {
     if (gamesList.length > 0) return (
         <>
             <Navigation />
-            <Form.Control type="text" placeholder="Enter your Steam ID" onChange={(e) => setSteamId(e.target.value)} />
-            <p></p>
-            <Button variant="primary" onClick={handleImportButton}>
-                Import Steam Library
-            </Button>
+            {!user.steamId && <p>Add your Steam ID in <a href="/profile">your profile</a> to get started.</p>}
+            {user.steamId &&
+                <>
+                    <Button variant="primary" onClick={handleImportButton}>
+                        Import Steam Library
+                    </Button>
+                </>
+            }
             <p></p>
             <Button variant="primary" onClick={() => setShowAddModal(true)}>Add New Game</Button>
             <p></p>
@@ -172,13 +208,19 @@ function Library(props) {
     return (
         <>
             <Navigation />
-            <Form.Control type="text" placeholder="Enter your Steam ID" onChange={(e) => setSteamId(e.target.value)} />
-            <p></p>
-            <Button variant="primary" onClick={handleImportButton}>
-                Import Steam Library
-            </Button>
+            <p>No games added yet. </p>
+            {user.steamId && <p>Import your Steam library to get started.</p>}
+            {!user.steamId && <p>Add your Steam ID in <a href="/profile">your profile</a> to get started.</p>}
+            {user.steamId &&
+                <>
+                    <Button variant="primary" onClick={handleImportButton}>
+                        Import Steam Library
+                    </Button>
+                </>
+            }
             <p></p>
             <Button variant="primary" onClick={() => setShowAddModal(true)}>Add New Game</Button>
+            <AddModal show={showAddModal} onHide={handleAddModalClose} />
         </>
     );
 

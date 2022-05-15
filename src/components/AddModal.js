@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Button, Modal, Table, Badge } from 'react-bootstrap';
 import LoadingScreen from "./LoadingScreen";
 import axios from "axios";
@@ -6,49 +6,67 @@ import axios from "axios";
 function AddModal(props) {
 
     const [loading, setLoading] = useState(false);
-    // const [manualInput, setManualInput] = useState(false);
+    const [manualInput, setManualInput] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResponse, setSearchResponse] = useState([]);
-    const [selectedGame, setSelectedGame] = useState({});
 
     const searchForGame = async () => {
         setLoading(true);
         setSearchResponse([]);
-        await axios.get(global.config.api.url + `game/search?searchTerm=${searchQuery}`)
+        await axios.get(global.config.api.url + `game/search?searchTerm=${searchQuery}`,
+            {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') },
+                'Content-Type': 'application/json'
+            })
             .then(res => setSearchResponse(res.data));
         console.log(searchResponse);
         setLoading(false);
     }
 
     const addGameToLibrary = async (game) => {
+        console.log(game);
+        game = { ...game, aggregatedRating: Math.round(game.aggregatedRating) }
 
-        game.id = -1;
-
-        await axios.post(global.config.api.url + `game/`, game)
+        await axios.post(global.config.api.url + `appUser/addGame/${localStorage.getItem('user_email')}`, game,
+            {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') },
+                'Content-Type': 'application/json'
+            })
             .then(res => console.log(res));
         setLoading(false);
+        props.onHide();
     }
 
-    // if (manualInput) {
-    //     return (<Modal show={props.show} onHide={props.onHide}>
-    //         <Modal.Header closeButton>
-    //             <Modal.Title>Add Game</Modal.Title>
-    //         </Modal.Header>
-    //         <Modal.Body>
-    //             <Form>
-    //                 <Form.Group className="mb-3" controlId="addGameForm">
-    //                     <Form.Label>Form Goes here</Form.Label>
-    //                     <Form.Control
-    //                         onChange={(e) => { console.log(e.target.value) }} />
-    //                 </Form.Group>
-    //             </Form>
-    //             <Button variant="secondary" onClick={props.onHide}>
-    //                 Close
-    //             </Button>
+    useEffect(() => {
+        setManualInput(false);
+    }, []);
 
-    //         </Modal.Body>
-    //     </Modal>)
-    // }
+    if (loading) {
+        return <LoadingScreen />;
+    }
+
+    if (manualInput) {
+        console.log(manualInput);
+        return (<Modal show={props.show} onHide={props.onHide}>
+            <Modal.Header closeButton>
+                <Modal.Title>Add Game</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form>
+                    <Form.Group className="mb-3" controlId="addGameForm">
+                        <Form.Label>Form Goes here</Form.Label>
+                        <Form.Control
+                            onChange={(e) => { console.log(e.target.value) }} />
+                    </Form.Group>
+                </Form>
+                <Button variant="secondary" onClick={props.onHide}>
+                    Close
+                </Button>
+
+            </Modal.Body>
+        </Modal>)
+    }
+
     if (searchResponse.length > 0) {
         return (<Modal show={props.show} onHide={props.onHide}>
             <Modal.Header closeButton>
@@ -65,7 +83,6 @@ function AddModal(props) {
                 <Button variant="secondary" onClick={props.onHide}>
                     Close
                 </Button>
-                {/* TODO make this button add game to backend */}
                 <Button variant="primary" onClick={() => {
                     searchForGame();
                 }}>
@@ -87,7 +104,7 @@ function AddModal(props) {
                             <tr>
                                 <td>{game.name}</td>
                                 <td>{game.releaseDate}</td>
-                                <td>{game.aggregatedRating > -1 ? + game.aggregatedRating + '%' : 'Unavailable'}</td>
+                                <td>{game.aggregatedRating > -1 ? + Math.round(game.aggregatedRating) + '%' : 'Unavailable'}</td>
                                 <td><Button variant="primary" onClick={() => {
                                     addGameToLibrary(game);
                                 }}>
@@ -123,10 +140,8 @@ function AddModal(props) {
             }}>
                 Search
             </Button>
-            <Button variant="secondary">
-                Close
-            </Button>
-
+            <p></p>
+            <Button variant="secondary" onClick={() => setManualInput(true)}>Manual Input</Button>
         </Modal.Body>
     </Modal>)
 
