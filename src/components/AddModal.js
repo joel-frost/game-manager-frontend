@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Form, Button, Modal, Table } from 'react-bootstrap';
 import LoadingScreen from "./LoadingScreen";
 import axios from "axios";
+import { FaPlusSquare, FaAngleLeft } from "react-icons/fa";
 
 function AddModal(props) {
 
@@ -9,6 +10,7 @@ function AddModal(props) {
     const [manualInput, setManualInput] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResponse, setSearchResponse] = useState([]);
+    const [manualGame, setManualGame] = useState({ name: "", gameStatus: "" });
 
     const searchForGame = async () => {
         setLoading(true);
@@ -19,12 +21,10 @@ function AddModal(props) {
                 'Content-Type': 'application/json'
             })
             .then(res => setSearchResponse(res.data));
-        console.log(searchResponse);
         setLoading(false);
     }
 
     const addGameToLibrary = async (game) => {
-        console.log(game);
         game = { ...game, aggregatedRating: Math.round(game.aggregatedRating) }
 
         await axios.post(global.config.api.url + `appUser/addGame/${localStorage.getItem('user_email')}`, game,
@@ -37,31 +37,64 @@ function AddModal(props) {
         props.onHide();
     }
 
+    const manualGameSubmitHandler = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        await addGameToLibrary(manualGame);
+        setLoading(false);
+    }
+
     useEffect(() => {
         setManualInput(false);
     }, []);
 
+
     if (loading) {
-        return <LoadingScreen />;
+        return (
+            <>
+                <Modal show={true}
+                    style={{ marginTop: 50 }}>
+                    <Modal.Header>
+                        <Modal.Title>Searching</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <LoadingScreen />
+                    </Modal.Body>
+                </Modal>
+            </>
+        );
     }
 
     if (manualInput) {
-        console.log(manualInput);
         return (<Modal show={props.show} onHide={props.onHide}>
             <Modal.Header closeButton>
                 <Modal.Title>Add Game</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form>
-                    <Form.Group className="mb-3" controlId="addGameForm">
-                        <Form.Label>Form Goes here</Form.Label>
-                        <Form.Control
-                            onChange={(e) => { console.log(e.target.value) }} />
+                <Button variant="secondary" onClick={() => setManualInput(false)}><FaAngleLeft /></Button>
+                <p></p>
+                <Form onSubmit={manualGameSubmitHandler}>
+                    <Form.Group className="mb-3" controlId="fn-input">
+                        <Form.Control type="name" placeholder="Game Name"
+                            onChange={e => setManualGame({ ...manualGame, name: e.target.value })} />
                     </Form.Group>
+                    <p></p>
+                    <Form.Select defaultValue={'Not Set'}
+                        onChange={(e) => setManualGame({ ...manualGame, gameStatus: e.target.value })}>
+                        <option>Playing</option>
+                        <option>On Hold</option>
+                        <option>Completed</option>
+                        <option>Abandoned</option>
+                        <option>Not Set</option>
+                    </Form.Select>
+                    <p></p>
+                    <Button variant="primary"
+                        type="submit"
+                        disabled={manualGame.name === "" || manualGame.gameStatus === ""}>
+                        Add Game
+                    </Button>
+
                 </Form>
-                <Button variant="secondary" onClick={props.onHide}>
-                    Close
-                </Button>
 
             </Modal.Body>
         </Modal>)
@@ -80,17 +113,12 @@ function AddModal(props) {
                             onChange={(e) => { setSearchQuery(e.target.value) }} />
                     </Form.Group>
                 </Form>
-                <Button variant="secondary" onClick={props.onHide}>
-                    Close
-                </Button>
                 <Button variant="primary" onClick={() => {
                     searchForGame();
                 }}>
                     Search
                 </Button>
-                <Button variant="secondary">
-                    Close
-                </Button>
+                <p></p>
                 <Table striped bordered hover>
                     <thead>
                         <tr>
@@ -108,7 +136,7 @@ function AddModal(props) {
                                 <td><Button variant="primary" onClick={() => {
                                     addGameToLibrary(game);
                                 }}>
-                                    Add Game
+                                    <FaPlusSquare />
                                 </Button></td>
                             </tr>
                         </tbody>
@@ -131,10 +159,6 @@ function AddModal(props) {
                         onChange={(e) => { setSearchQuery(e.target.value) }} />
                 </Form.Group>
             </Form>
-            <Button variant="secondary" onClick={props.onHide}>
-                Close
-            </Button>
-            {/* TODO make this button add game to backend */}
             <Button variant="primary" onClick={() => {
                 searchForGame();
             }}>
