@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, Modal, Table, Badge } from 'react-bootstrap';
+import { Form, Button, Modal, Table } from 'react-bootstrap';
 import LoadingScreen from "./LoadingScreen";
 import axios from "axios";
 

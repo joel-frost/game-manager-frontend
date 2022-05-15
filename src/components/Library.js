@@ -16,7 +16,6 @@ function Library(props) {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [gamesList, setGamesList] = useState({});
-    const [steamId, setSteamId] = useState("");
     const [showEditModal, setShowEditModal] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
     const [activeGame, setActiveGame] = useState({});
