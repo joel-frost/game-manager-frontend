@@ -97,9 +97,10 @@ function Profile(props) {
 
     return (
 
-        <>
+        <div className='form-inline'>
             <Navigation />
             <h4>Personal Information</h4>
+
             <Form>
                 <Form.Group className="mb-3" controlId="editPersonalDetails">
                     <Form.Label>First Name</Form.Label>
@@ -113,6 +114,7 @@ function Profile(props) {
             <Button variant="primary" onClick={updateUserProfile}>
                 Save Changes
             </Button>
+
             <p></p>
             <h4>Steam Details</h4>
             <Form>
@@ -127,7 +129,8 @@ function Profile(props) {
                     disabled={updateSteamDetails.steamUsername.length <= 0}>
                     Save Changes</Button>
             </Form>
-        </>
+        </div>
+
     )
 }
 

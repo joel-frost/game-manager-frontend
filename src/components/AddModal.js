@@ -10,7 +10,7 @@ function AddModal(props) {
     const [manualInput, setManualInput] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResponse, setSearchResponse] = useState([]);
-    const [manualGame, setManualGame] = useState({ name: "", gameStatus: "" });
+    const [manualGame, setManualGame] = useState({ name: "" });
 
     const searchForGame = async () => {
         setLoading(true);
@@ -26,8 +26,9 @@ function AddModal(props) {
 
     const addGameToLibrary = async (game) => {
         game = { ...game, aggregatedRating: Math.round(game.aggregatedRating) }
+        console.log(game);
 
-        await axios.post(global.config.api.url + `appUser/addGame/${localStorage.getItem('user_email')}`, game,
+        await axios.post(global.config.api.url + `appUserGame/addGame/${localStorage.getItem('user_id')}`, game,
             {
                 headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') },
                 'Content-Type': 'application/json'
@@ -79,18 +80,9 @@ function AddModal(props) {
                             onChange={e => setManualGame({ ...manualGame, name: e.target.value })} />
                     </Form.Group>
                     <p></p>
-                    <Form.Select defaultValue={'Not Set'}
-                        onChange={(e) => setManualGame({ ...manualGame, gameStatus: e.target.value })}>
-                        <option>Playing</option>
-                        <option>On Hold</option>
-                        <option>Completed</option>
-                        <option>Abandoned</option>
-                        <option>Not Set</option>
-                    </Form.Select>
-                    <p></p>
                     <Button variant="primary"
                         type="submit"
-                        disabled={manualGame.name === "" || manualGame.gameStatus === ""}>
+                        disabled={manualGame.name === ""}>
                         Add Game
                     </Button>
 
