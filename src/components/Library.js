@@ -10,8 +10,6 @@ import NotFoundToolTip from "./NotFoundToolTip";
 import "./library.css";
 import { FaPlay, FaEdit, FaTrash } from "react-icons/fa";
 
-//TODO: Add a checkbox to include or exclude unrated games.
-
 function Library(props) {
     //76561198000548372
     const navigate = useNavigate();
@@ -111,14 +109,11 @@ function Library(props) {
                 'Content-Type': 'application/json'
             })
             .then(res => {
-                console.log(res.data);
                 setGamesList(res.data);
             });
         setLoading(false);
     }
 
-
-    //TODO: Make this update the game in the user's list.
     const updateGame = async (editedGame) => {
         editedGame.id = activeGame.id;
         if (Object.entries(editedGame).length > 0) {
@@ -200,7 +195,6 @@ function Library(props) {
     }
 
     const deleteGame = async (gameId) => {
-        console.log(gameId);
         setLoading(true);
         await axios.delete(global.config.api.url + `appUserGame/deleteGame/${gameId}`,
             {

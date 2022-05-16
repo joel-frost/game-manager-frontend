@@ -39,7 +39,6 @@ function EditModal(props) {
             <Button variant="secondary" onClick={props.onHide}>
                 Close
             </Button>
-            {/* TODO make this button add game to backend */}
             <Button variant="primary" onClick={() => {
                 props.updateGame(editedGameObj);
                 setEditedGameObj({});

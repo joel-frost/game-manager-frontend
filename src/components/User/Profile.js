@@ -17,8 +17,6 @@ function Profile(props) {
         setUpdateSteamDetails({ steamUsername: "" });
     }
 
-
-    // TODO: Only working with access token.
     const getUserProfile = async () => {
         setIsLoading(true);
         axios.get(global.config.api.url + 'appUser/findByEmail/' + localStorage.getItem('user_email'),

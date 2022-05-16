@@ -26,7 +26,6 @@ function AddModal(props) {
 
     const addGameToLibrary = async (game) => {
         game = { ...game, aggregatedRating: Math.round(game.aggregatedRating) }
-        console.log(game);
 
         await axios.post(global.config.api.url + `appUserGame/addGame/${localStorage.getItem('user_id')}`, game,
             {
