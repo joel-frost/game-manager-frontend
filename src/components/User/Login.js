@@ -25,7 +25,6 @@ function Login() {
         };
         axios(options).then(res => {
             if (res.status === 200) {
-                console.log(res.data);
                 localStorage.setItem('access_token', res.data.access_token);
                 localStorage.setItem('refresh_token', res.data.refresh_token);
                 localStorage.setItem('user_email', details.email);
@@ -35,7 +34,6 @@ function Login() {
             }
         }).catch(err => {
             setError(true);
-            console.log("Incorrect details");
         });
     }
 
@@ -62,7 +60,7 @@ function Login() {
 
                         {error && <p className="error">Incorrect details</p>}
 
-                        <p>Don't have an account? <a href="signup">sign up</a></p>
+                        <p>Don't have an account? <a href="signup">Sign Up</a></p>
 
                     </Form>
                 </div>

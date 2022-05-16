@@ -19,12 +19,14 @@ function Logout() {
             <Navigation />
             <div className="form-wrapper">
                 <div className="form-inner">
-                    <Form>
-                        <Button variant="primary" type="submit"
-                            onClick={handleLogout} >
-                            Log Out
-                        </Button>
-                    </Form>
+                    <div className='center'>
+                        <Form>
+                            <Button variant="primary" type="submit"
+                                onClick={handleLogout} >
+                                Log Out
+                            </Button>
+                        </Form>
+                    </div>
                 </div>
             </div>
         </>

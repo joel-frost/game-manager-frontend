@@ -19,7 +19,6 @@ function Library(props) {
     const [gamesList, setGamesList] = useState({});
     const [showEditModal, setShowEditModal] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
-    const [activeGame, setActiveGame] = useState({});
     const [nameSearch, setNameSearch] = useState("");
     const [statusSearch, setStatusSearch] = useState("");
     const [ratingSearch, setRatingSearch] = useState("-99");
@@ -27,6 +26,12 @@ function Library(props) {
     const [playTimeSearch, setPlayTimeSearch] = useState("-99");
     const [user, setUser] = useState({});
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const [activeGame, setActiveGame] = useState({
+        "id": "",
+        "gameStatus": "",
+        "playTime": "",
+        "game": {}
+    });
 
     const RatingFilter = Symbol("RatingFilter");
     const StatusFilter = {
@@ -42,6 +47,12 @@ function Library(props) {
     const handleEditModalClose = () => setShowEditModal(false);
     const handleAddModalClose = () => {
         setShowAddModal(false);
+        setActiveGame({
+            "id": "",
+            "gameStatus": "",
+            "playTime": "",
+            "game": {}
+        });
         getAllGames();
     }
 
@@ -109,10 +120,13 @@ function Library(props) {
 
     //TODO: Make this update the game in the user's list.
     const updateGame = async (editedGame) => {
+        editedGame.id = activeGame.id;
         if (Object.entries(editedGame).length > 0) {
             setLoading(true);
-            editedGame.id = activeGame.id;
-            await axios.put(global.config.api.url + `game/`, editedGame)
+            await axios.put(global.config.api.url + `appUserGame/updateGame`, editedGame,
+                {
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') },
+                })
                 .then(res => console.log(res));
             refreshPage();
         }
@@ -128,6 +142,7 @@ function Library(props) {
                         throw new Error('User not found');
                     }
                     setUser(res.data);
+                    localStorage.setItem('user_id', res.data.id);
                 }
             })
             .catch(err => {
@@ -137,7 +152,12 @@ function Library(props) {
     }
 
     const refreshPage = async () => {
-        setActiveGame({});
+        setActiveGame({
+            "id": "",
+            "gameStatus": "",
+            "playTime": "",
+            "game": {}
+        });
         setUser({});
         await getUserProfile();
         await getAllGames();
@@ -151,6 +171,10 @@ function Library(props) {
         setRatingSearch("-99");
         setGenreSearch("");
         setPlayTimeSearch("-99");
+        if (document.getElementById("advanced-filters")) {
+            document.getElementById("advanced-filters").reset();
+        }
+
     }
 
 
@@ -176,8 +200,9 @@ function Library(props) {
     }
 
     const deleteGame = async (gameId) => {
+        console.log(gameId);
         setLoading(true);
-        await axios.delete(global.config.api.url + `appUser/deleteGame/${localStorage.getItem('user_email')}/${gameId}`,
+        await axios.delete(global.config.api.url + `appUserGame/deleteGame/${gameId}`,
             {
                 headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') },
             })
@@ -187,17 +212,17 @@ function Library(props) {
         setLoading(false);
     }
 
-    const filteredGamesList = Object.values(gamesList).filter((game) => {
+    const filteredGamesList = Object.values(gamesList).filter((gameObj) => {
         return ((
-            game.name.toLowerCase().includes(nameSearch.toLowerCase())
+            gameObj.game.name.toLowerCase().includes(nameSearch.toLowerCase())
             ||
-            game.description.toLowerCase().includes(nameSearch.toLowerCase())
+            gameObj.game.description.toLowerCase().includes(nameSearch.toLowerCase())
         )
             &&
-            game.gameStatus.toLowerCase().includes(statusSearch.toLowerCase())
-            && game.aggregatedRating >= parseInt(ratingSearch)
-            && game.genre.toLowerCase().includes(genreSearch.toLowerCase())
-            && game.playTime >= parseInt(playTimeSearch)
+            gameObj.gameStatus.toLowerCase().includes(statusSearch.toLowerCase())
+            && gameObj.game.aggregatedRating >= parseInt(ratingSearch)
+            && gameObj.game.genre.toLowerCase().includes(genreSearch.toLowerCase())
+            && gameObj.playTime >= parseInt(playTimeSearch)
         )
 
     });
@@ -219,30 +244,36 @@ function Library(props) {
                             Import Steam Library
                         </Button>
                     </ListGroup.Item>}
-                <ListGroup.Item style={{ border: "none" }}><Button variant="primary" onClick={() => setShowAddModal(true)}>Add New Game</Button></ListGroup.Item>
+                <ListGroup.Item style={{ border: "none" }}><Button variant="secondary" onClick={() => setShowAddModal(true)}>Add New Game</Button></ListGroup.Item>
             </ListGroup>
             <p></p>
             <h4>Quick Filters</h4>
             <ListGroup horizontal>
-                <ListGroup.Item style={{ border: "none" }}><Button variant="primary" onClick={() => handleQuickFilters(RatingFilter)}>70+ Rated</Button></ListGroup.Item>
-                <ListGroup.Item style={{ border: "none" }}><Button variant="primary" onClick={() => handleQuickFilters(StatusFilter.PLAYING)}>Playing</Button></ListGroup.Item>
-                <ListGroup.Item style={{ border: "none" }}><Button variant="primary" onClick={() => handleQuickFilters(StatusFilter.COMPLETED)}>Completed</Button></ListGroup.Item>
-                <ListGroup.Item style={{ border: "none" }}><Button variant="primary" onClick={() => handleQuickFilters(StatusFilter.ONHOLD)}>On Hold</Button></ListGroup.Item>
-                <ListGroup.Item style={{ border: "none" }}><Button variant="primary" onClick={() => handleQuickFilters(StatusFilter.ABANDONED)}>Abandoned</Button></ListGroup.Item>
-                <ListGroup.Item style={{ border: "none" }}><Button variant="primary" onClick={() => handleQuickFilters(StatusFilter.NOT_SET)}>Not Set</Button></ListGroup.Item>
+                <ListGroup.Item style={{ border: "none" }}><Button variant="secondary" onClick={() => handleQuickFilters(RatingFilter)}>70+ Rated</Button></ListGroup.Item>
+                <ListGroup.Item style={{ border: "none" }}><Button variant="secondary" onClick={() => handleQuickFilters(StatusFilter.PLAYING)}>Playing</Button></ListGroup.Item>
+                <ListGroup.Item style={{ border: "none" }}><Button variant="secondary" onClick={() => handleQuickFilters(StatusFilter.COMPLETED)}>Completed</Button></ListGroup.Item>
+                <ListGroup.Item style={{ border: "none" }}><Button variant="secondary" onClick={() => handleQuickFilters(StatusFilter.ONHOLD)}>On Hold</Button></ListGroup.Item>
+                <ListGroup.Item style={{ border: "none" }}><Button variant="secondary" onClick={() => handleQuickFilters(StatusFilter.ABANDONED)}>Abandoned</Button></ListGroup.Item>
+                <ListGroup.Item style={{ border: "none" }}><Button variant="secondary" onClick={() => handleQuickFilters(StatusFilter.NOT_SET)}>Not Set</Button></ListGroup.Item>
                 <ListGroup.Item style={{ border: "none" }}><Button variant="danger" onClick={() => resetFilters()}>Reset Filters</Button></ListGroup.Item>
             </ListGroup>
             <p></p>
-            <Button variant="primary" onClick={() => {
-                resetFilters();
-                setShowAdvancedFilters(!showAdvancedFilters);
-            }}>
-                Toggle Advanced Filters
-            </Button>
+            <ListGroup horizontal>
+                <ListGroup.Item style={{ border: "none" }}>
+                    <Button variant="primary" onClick={() => {
+                        resetFilters();
+                        setShowAdvancedFilters(!showAdvancedFilters);
+                    }}>
+                        Toggle Advanced Filters
+                    </Button>
+                </ListGroup.Item>
+            </ListGroup>
+
             <p></p>
             {
                 showAdvancedFilters &&
-                <>
+
+                <Form id="advanced-filters">
                     <Form.Control type="text" placeholder="Search by name or description" onChange={(e) => setNameSearch(e.target.value)} />
                     <p></p>
                     <Form.Control type="text" placeholder="Search by status" onChange={(e) => setStatusSearch(e.target.value)} />
@@ -252,7 +283,7 @@ function Library(props) {
                     <Form.Control type="text" placeholder="Genre" onChange={(e) => setGenreSearch(e.target.value)} />
                     <p></p>
                     <Form.Control type="text" placeholder="Play Time" onChange={(e) => setPlayTimeSearch(e.target.value * 60)} />
-                </>
+                </Form>
             }
             <Table striped bordered hover>
                 <thead>
@@ -267,41 +298,41 @@ function Library(props) {
                         <th></th>
                     </tr>
                 </thead>
-                {filteredGamesList.map((game) =>
-                    <tbody key={game.id}>
+                {filteredGamesList.map((gameObj) =>
+                    <tbody key={gameObj.id}>
                         <tr>
-                            <td>{game.name}</td>
-                            <td>{game.description ? game.description : <NotFoundToolTip />}</td>
-                            <td>{game.genre ? game.genre : <NotFoundToolTip />}</td>
+                            <td>{gameObj.game.name}</td>
+                            <td>{gameObj.game.description ? gameObj.game.description : <NotFoundToolTip />}</td>
+                            <td>{gameObj.game.genre ? gameObj.game.genre : <NotFoundToolTip />}</td>
                             <td>
-                                {game.releaseDate && new Date(game.releaseDate) > new Date('1990-01-01')
-                                    ? new Date(game.releaseDate).toLocaleString('en-GB', { year: 'numeric', month: 'numeric', day: 'numeric' })
+                                {gameObj.game.releaseDate && new Date(gameObj.game.releaseDate) > new Date('1990-01-01')
+                                    ? new Date(gameObj.game.releaseDate).toLocaleString('en-GB', { year: 'numeric', month: 'numeric', day: 'numeric' })
                                     : <NotFoundToolTip />}
                             </td>
-                            <td>{game.aggregatedRating > -1 ? + Math.round(game.aggregatedRating * 10) / 10 + '%' : <NotFoundToolTip />}</td>
-                            <td>{game.playTime > -1 ? Math.round(game.playTime / 60) : <NotFoundToolTip />}</td>
-                            <td>{game.gameStatus}</td>
+                            <td>{gameObj.game.aggregatedRating > -1 ? + Math.round(gameObj.game.aggregatedRating * 10) / 10 + '%' : <NotFoundToolTip />}</td>
+                            <td>{gameObj.playTime > -1 ? Math.round(gameObj.playTime / 60) : <NotFoundToolTip />}</td>
+                            <td>{gameObj.gameStatus}</td>
                             <td>
-                                {game.steamAppId > 0 &&
+                                {gameObj.game.steamAppId > 0 &&
                                     <>
-                                        <Button href={`steam://run/${game.steamAppId}/`} variant="primary"><FaPlay /></Button>
+                                        <Button href={`steam://run/${gameObj.game.steamAppId}/`} variant="success"><FaPlay /></Button>
                                         <p></p>
                                     </>
                                 }
                                 <Button variant="primary" onClick={() => {
-                                    setActiveGame(game);
+                                    setActiveGame({ ...activeGame, game: gameObj.game, gameStatus: gameObj.gameStatus, playTime: gameObj.playTime, id: gameObj.id });
                                     setShowEditModal(true);
                                 }}>
                                     <FaEdit />
                                 </Button>
                                 <p></p>
-                                <Button variant="danger" onClick={() => { if (window.confirm(`Are you sure you want to remove ${game.name} from your library?`)) deleteGame(game.id) }}><FaTrash /></Button>
+                                <Button variant="danger" onClick={() => { if (window.confirm(`Are you sure you want to remove ${gameObj.game.name} from your library?`)) deleteGame(gameObj.id) }}><FaTrash /></Button>
                             </td>
                         </tr>
                     </tbody>
                 )}
             </Table>
-            <AddModal show={showAddModal} onHide={handleAddModalClose} />
+            <AddModal show={showAddModal} onHide={handleAddModalClose} userId={user.id} />
             <EditModal show={showEditModal} onHide={handleEditModalClose} updateGame={updateGame} activeGame={activeGame} />
         </>
     );
@@ -320,7 +351,7 @@ function Library(props) {
                 </>
             }
             <p></p>
-            <Button variant="primary" onClick={() => setShowAddModal(true)}>Add New Game</Button>
+            <Button variant="secondary" onClick={() => setShowAddModal(true)}>Add New Game</Button>
             <AddModal show={showAddModal} onHide={handleAddModalClose} />
         </>
     );
