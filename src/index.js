@@ -6,6 +6,18 @@ import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter } from "react-router-dom";
 import './config';
+import axios from 'axios';
+
+axios.interceptors.response.use(response => response, error => {
+  const status = error.response ? error.response.status : null
+  if (status === 403) {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_email');
+    localStorage.setItem('logged_in', false);
+    window.location.href = '/login';
+  }
+});
 
 const rootElement = document.getElementById("root");
 const root = createRoot(rootElement);
